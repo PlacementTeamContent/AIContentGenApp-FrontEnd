@@ -545,6 +545,7 @@ const CodeAnalysis = () => {
                         technology={technology}
                         topicTag={topicTag}
                         subTopicTag={subTopicTag}
+                        disabled={questionsJson.length <= 0}
                     />
                 </div>
             </div>

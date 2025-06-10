@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-const DownloadCSVButton = ({ questionJSONs, technology, topicTag, subTopicTag }) => {
+const DownloadCSVButton = ({ questionJSONs, technology, topicTag, subTopicTag, disabled }) => {
     const escapeCSV = (value) => {
         if (value === undefined || value === null) return '';
         const stringVal = typeof value === 'string' ? value : JSON.stringify(value);
@@ -28,7 +28,7 @@ const DownloadCSVButton = ({ questionJSONs, technology, topicTag, subTopicTag })
             'w_options',
             'options_content_type',
             'code_data',
-            'code_language',           
+            'code_language',
             'explanation',
             'explanation_content_type',
             'toughness'
@@ -65,6 +65,7 @@ const DownloadCSVButton = ({ questionJSONs, technology, topicTag, subTopicTag })
                 'SOURCE_GPT',
                 'IN_OFFLINE_EXAM',
                 'COMPANY_UNKNOWN',
+                'IS_PUBLIC',
                 question_id
             ].filter(Boolean).join('\n');
 
@@ -120,14 +121,18 @@ const DownloadCSVButton = ({ questionJSONs, technology, topicTag, subTopicTag })
 
     return (
         <button
+            className={`download-csv-btn ${disabled ? 'disabled' : ''}`}
+            disabled={disabled}
             onClick={downloadCSV}
             style={{
                 padding: '8px 16px',
-                background: '#28a745',
+                background: disabled ? '#6c757d' : '#28a745', // Gray background when disabled
                 color: '#fff',
                 border: 'none',
                 borderRadius: '4px',
-                cursor: 'pointer'
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                opacity: disabled ? 0.5 : 1, // Note: no quotes around 0.5 and 1
+                transition: 'all 0.2s ease' // Optional: smooth transition
             }}
         >
             Download CSV
