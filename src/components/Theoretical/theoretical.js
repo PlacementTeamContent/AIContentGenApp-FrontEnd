@@ -11,6 +11,7 @@ const Theoretical = () => {
     useAuthGuard();
     const navigate = useNavigate();
 
+    // State variables
     const [technology, setTechnology] = useState("");
     const [topic, setTopic] = useState("");
     const [numberOfQuestions, setNumberOfQuestions] = useState("");
@@ -23,9 +24,10 @@ const Theoretical = () => {
     const [loading, setLoading] = useState(false);
     const [questionsJson, setQuestionsJson] = useState([]);
 
+    // Technology mapping
     const techToProcessName = {
         CPP: "ca_mcq_cpp",
-        Python: "ca_mcq_python",
+        Python: "theory_mcq_python",
         Java: "ca_mcq_java",
         C: "ca_mcq_c",
         Javascript: "ca_mcq_javascript",
@@ -33,6 +35,7 @@ const Theoretical = () => {
         HTML_CSS: "theory_mcq_html_css"
     };
 
+    // Get difficulty counts for display
     const getDifficultyCounts = () => {
         const counts = { EASY: 0, MEDIUM: 0, HARD: 0 };
         questionsJson.forEach(qStr => {
@@ -49,16 +52,32 @@ const Theoretical = () => {
         return counts;
     };
 
+    // Check if all required fields are filled
     const allFieldsFilled = () => {
         return (
             technology && technology !== "default" &&
             difficulty && difficulty !== "default" &&
-            topic && numberOfQuestions &&
-            topicTag && subTopicTag &&
+            topic &&
+            numberOfQuestions &&
+            topicTag &&
+            subTopicTag &&
             syllabus
         );
     };
 
+    // Helper function to transform options from object to array
+    const transformOptionsToArray = (questionObj) => {
+        if (questionObj && typeof questionObj.options === 'object' && !Array.isArray(questionObj.options)) {
+            const optionsArray = Object.entries(questionObj.options).map(([text, correct]) => ({
+                text: text,
+                correct: correct
+            }));
+            return { ...questionObj, options: optionsArray };
+        }
+        return questionObj;
+    };
+
+    // Request questions from API
     const requestQuestions = async () => {
         if (!allFieldsFilled()) return;
 
@@ -86,8 +105,8 @@ const Theoretical = () => {
             );
 
             const data = await response.json();
-
             let parsedQuestions;
+
             try {
                 parsedQuestions = JSON.parse(data.message.trim());
             } catch {
@@ -98,7 +117,11 @@ const Theoretical = () => {
                 parsedQuestions = [];
             }
 
-            const stringifiedQuestions = parsedQuestions.map(q => JSON.stringify(q, null, 2));
+            // Transform options to array before stringifying
+            const stringifiedQuestions = parsedQuestions.map(q =>
+                JSON.stringify(transformOptionsToArray(q), null, 2)
+            );
+
             setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
         } catch {
             // handle fetch error silently or add notification as needed
@@ -107,10 +130,12 @@ const Theoretical = () => {
         }
     };
 
+    // Handle topic change
     const handleTopicChange = (e) => {
         setTopicTag(e.target.value);
     };
 
+    // Handle technology change and fetch prompt
     const handleTechnologyChange = async (e) => {
         const value = e.target.value;
         setTechnology(value);
@@ -123,7 +148,6 @@ const Theoretical = () => {
             console.error("No mapping found for technology:", value);
             return;
         }
-        if (!mappedProcessName) return;
 
         const response = await authFetch(
             "https://ravik00111110.pythonanywhere.com/api/content-gen/prompt/",
@@ -144,6 +168,7 @@ const Theoretical = () => {
         }
     };
 
+    // Update message template with current values
     const updateMessage = (template, overrides = {}) => {
         const replacements = {
             "{{technology}}": overrides.technology ?? technology,
@@ -151,7 +176,7 @@ const Theoretical = () => {
             "{{no_of_questions}}": overrides.number_of_questions ?? numberOfQuestions,
             "{{difficulty_level}}": overrides.difficulty ?? difficulty,
             "{{topic_tag}}": overrides.topic_tag ?? topicTag,
-            "{{sub_topic_tag}}": overrides.sub_topic_tag ?? subTopicTag,
+            "{{sub_topic_tag}}": overrides.subTopicTag ?? subTopicTag,
             "{{syllabus_details}}": overrides.syllabus ?? syllabus,
         };
 
@@ -165,37 +190,26 @@ const Theoretical = () => {
         return updated;
     };
 
+    // Handle logout
     const handleLogout = () => {
         Cookies.remove("accessToken");
         Cookies.remove("refreshToken");
         navigate("/login");
     };
 
-    // New CSV download functionality
+    // Download questions as CSV
     const downloadCSV = () => {
         if (questionsJson.length === 0) {
             alert("No questions available to download");
             return;
         }
 
-        // CSV headers
         const headers = [
-            "Question",
-            "OptionA",
-            "OptionB",
-            "OptionC",
-            "OptionD",
-            "Answer",
-            "explanation",
-            "HTML code",
-            "CSS code",
-            "JS code",
-            "toughness",
-            "topic",
-            "Sub_topic"
+            "Question", "OptionA", "OptionB", "OptionC", "OptionD", "Answer",
+            "explanation", "HTML code", "CSS code", "JS code", "toughness",
+            "topic", "Sub_topic"
         ];
 
-        // Convert questions to CSV format
         const csvData = questionsJson.map(qStr => {
             let questionObj;
             try {
@@ -204,30 +218,26 @@ const Theoretical = () => {
                 return new Array(headers.length).fill("");
             }
 
-            // Extract options in order (A, B, C, D)
-            const options = questionObj.options || {};
-            const optionKeys = Object.keys(options);
-            const sortedOptions = optionKeys.sort();
-
-            // Get the options A, B, C, D
-            const optionA = sortedOptions[0] || "";
-            const optionB = sortedOptions[1] || "";
-            const optionC = sortedOptions[2] || "";
-            const optionD = sortedOptions[3] || "";
-
-            // Find the correct answer (the option with TRUE value)
-            let correctAnswer = "";
-            for (const [optionText, isCorrect] of Object.entries(options)) {
-                if (isCorrect === "TRUE" || isCorrect === true) {
-                    // Find which option (A, B, C, D) this corresponds to
-                    const optionIndex = sortedOptions.indexOf(optionText);
-                    if (optionIndex === 0) correctAnswer = "A";
-                    else if (optionIndex === 1) correctAnswer = "B";
-                    else if (optionIndex === 2) correctAnswer = "C";
-                    else if (optionIndex === 3) correctAnswer = "D";
-                    break;
-                }
+            // Ensure options is an array and has at least 4 elements
+            const options = questionObj.options || [];
+            while (options.length < 4) {
+                options.push({ text: '', correct: 'FALSE' });
             }
+
+            const optionA = options[0]?.text || "";
+            const optionB = options[1]?.text || "";
+            const optionC = options[2]?.text || "";
+            const optionD = options[3]?.text || "";
+
+            let correctAnswer = "";
+            options.forEach((option, index) => {
+                if (option.correct === "TRUE" || option.correct === true) {
+                    if (index === 0) correctAnswer = "A";
+                    else if (index === 1) correctAnswer = "B";
+                    else if (index === 2) correctAnswer = "C";
+                    else if (index === 3) correctAnswer = "D";
+                }
+            });
 
             return [
                 questionObj.question_text || "",
@@ -246,12 +256,10 @@ const Theoretical = () => {
             ];
         });
 
-        // Create CSV content
         const csvContent = [
             headers.join(","),
             ...csvData.map(row =>
                 row.map(cell => {
-                    // Escape quotes and wrap in quotes if cell contains comma, quote, or newline
                     const cellStr = String(cell || "");
                     if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
                         return '"' + cellStr.replace(/"/g, '""') + '"';
@@ -261,21 +269,145 @@ const Theoretical = () => {
             )
         ].join("\n");
 
-        // Create and download file
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
 
-        // Generate filename with current date and technology
         const currentDate = new Date().toISOString().split('T')[0];
         const filename = `${technology || 'questions'}_${currentDate}_mcq.csv`;
         link.setAttribute("download", filename);
-
         link.style.visibility = 'hidden';
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    // Define initial question structure
+    const initialQuestion = {
+        question_text: "",
+        answer_explanation_content: "",
+        difficulty_level: "",
+        options: [
+            { text: "", correct: "FALSE" },
+            { text: "", correct: "FALSE" },
+            { text: "", correct: "FALSE" },
+            { text: "", correct: "FALSE" }
+        ]
+    };
+
+    // FIXED: Handle field changes in questions
+    const handleFieldChange = (index, field, value, optionIndex = null) => {
+        setQuestionsJson(prevQuestions => {
+            const updatedQuestions = [...prevQuestions];
+            try {
+                const questionObj = JSON.parse(updatedQuestions[index]);
+
+                if (field === "options" && optionIndex !== null) {
+                    // If options is not an array, convert it to an array
+                    if (!Array.isArray(questionObj.options)) {
+                        questionObj.options = Object.entries(questionObj.options).map(([text, correct]) => ({
+                            text, correct
+                        }));
+                    }
+                    // Ensure we have enough options
+                    while (questionObj.options.length <= optionIndex) {
+                        questionObj.options.push({ text: "", correct: "FALSE" });
+                    }
+                    // Update the specific option property
+                    questionObj.options[optionIndex] = {
+                        ...questionObj.options[optionIndex],
+                        [value]: field === "option_text" ? value : (field === "option_correct" ? value : questionObj.options[optionIndex][value])
+                    };
+                } else {
+                    // Directly update the field if it's not an option
+                    questionObj[field] = value;
+                }
+
+                // Stringify the updated question object
+                updatedQuestions[index] = JSON.stringify(questionObj, null, 2);
+            } catch (error) {
+                console.error("Error parsing or updating JSON:", error);
+            }
+            return updatedQuestions;
+        });
+    };
+
+    // FIXED: Handle option text change
+    const handleOptionTextChange = (questionIndex, optionIndex, newText) => {
+        setQuestionsJson(prevQuestions => {
+            const updatedQuestions = [...prevQuestions];
+            try {
+                const questionObj = JSON.parse(updatedQuestions[questionIndex]);
+
+                // Ensure options is an array
+                if (!Array.isArray(questionObj.options)) {
+                    questionObj.options = Object.entries(questionObj.options).map(([text, correct]) => ({
+                        text, correct
+                    }));
+                }
+
+                // Ensure we have enough options
+                while (questionObj.options.length <= optionIndex) {
+                    questionObj.options.push({ text: "", correct: "FALSE" });
+                }
+
+                // Update the text of the specific option
+                questionObj.options[optionIndex].text = newText;
+
+                updatedQuestions[questionIndex] = JSON.stringify(questionObj, null, 2);
+            } catch (error) {
+                console.error("Error updating option text:", error);
+            }
+            return updatedQuestions;
+        });
+    };
+
+    // FIXED: Handle option correct change
+    const handleOptionCorrectChange = (questionIndex, optionIndex, newCorrect) => {
+        setQuestionsJson(prevQuestions => {
+            const updatedQuestions = [...prevQuestions];
+            try {
+                const questionObj = JSON.parse(updatedQuestions[questionIndex]);
+
+                // Ensure options is an array
+                if (!Array.isArray(questionObj.options)) {
+                    questionObj.options = Object.entries(questionObj.options).map(([text, correct]) => ({
+                        text, correct
+                    }));
+                }
+
+                // Ensure we have enough options
+                while (questionObj.options.length <= optionIndex) {
+                    questionObj.options.push({ text: "", correct: "FALSE" });
+                }
+
+                // Update the correct property of the specific option
+                questionObj.options[optionIndex].correct = newCorrect;
+
+                updatedQuestions[questionIndex] = JSON.stringify(questionObj, null, 2);
+            } catch (error) {
+                console.error("Error updating option correct:", error);
+            }
+            return updatedQuestions;
+        });
+    };
+
+    // Delete a question
+    const handleDelete = (i) => {
+        const newQuestions = questionsJson.filter((_, idx) => idx !== i);
+        setQuestionsJson(newQuestions);
+    };
+
+    // Clear questions function
+    const handleClearQuestions = () => {
+        if (questionsJson.length > 0) {
+            const confirmClear = window.confirm("Are you sure you want to clear all questions?");
+            if (confirmClear) {
+                setQuestionsJson([]);
+            }
+        }
     };
 
     return (
@@ -286,11 +418,15 @@ const Theoretical = () => {
                     <legend className="codeAnalysisLegand">Theoretical MCQ Question</legend>
 
                     <div className="details-text-prompt">
-                        <h3>-----  Details for Prompt  -----</h3>
+                        <h3>----- Details for Prompt -----</h3>
                     </div>
 
                     <div className="itemsCA">
-                        <select className="itemCA1" value={technology} onChange={handleTechnologyChange}>
+                        <select
+                            className="itemCA1"
+                            value={technology}
+                            onChange={handleTechnologyChange}
+                        >
                             <option value="default">Technology</option>
                             <option value="CPP">CPP</option>
                             <option value="Python">Python</option>
@@ -358,11 +494,14 @@ const Theoretical = () => {
                     </div>
 
                     <div className="topin-input">
-                        <select className="itemCA1" value={topicTag} onChange={handleTopicChange}>
+                        <select
+                            className="itemCA1"
+                            value={topicTag}
+                            onChange={handleTopicChange}
+                        >
                             <option value="default">Choose Topic Tag</option>
-
-                            <option value="TOPIC_HTML_CSS_MCQ">TOPIC_HTML_CSS_MCQ
-                            </option>
+                            <option value="TOPIC_HTML_CSS_MCQ">TOPIC_HTML_CSS_MCQ</option>
+                            <option value="TOPIC_PYTHON_MCQ">TOPIC_PYTHON_MCQ</option>
                         </select>
 
                         <input
@@ -408,7 +547,12 @@ const Theoretical = () => {
                         >
                             {loading ? "Generating..." : "Generate Questions"}
                         </button>
-                        <button className="clearButton" onClick={() => setQuestionsJson([])}>
+
+                        <button
+                            className={`clearButton ${questionsJson.length === 0 ? "disabledBtn" : ""}`}
+                            onClick={handleClearQuestions}
+                            disabled={questionsJson.length === 0}
+                        >
                             Clear Questions
                         </button>
                     </div>
@@ -438,9 +582,15 @@ const Theoretical = () => {
                                     const counts = getDifficultyCounts();
                                     return (
                                         <>
-                                            <span style={{ color: "#28a745", fontWeight: "600" }}>Easy: {counts.EASY}</span>
-                                            <span style={{ color: "#ffc107", fontWeight: "600" }}>Medium: {counts.MEDIUM}</span>
-                                            <span style={{ color: "#dc3545", fontWeight: "600" }}>Hard: {counts.HARD}</span>
+                                            <span style={{ color: "#28a745", fontWeight: "600" }}>
+                                                Easy: {counts.EASY}
+                                            </span>
+                                            <span style={{ color: "#ffc107", fontWeight: "600" }}>
+                                                Medium: {counts.MEDIUM}
+                                            </span>
+                                            <span style={{ color: "#dc3545", fontWeight: "600" }}>
+                                                Hard: {counts.HARD}
+                                            </span>
                                         </>
                                     );
                                 })()}
@@ -448,170 +598,159 @@ const Theoretical = () => {
                         </div>
 
                         {questionsJson.map((qStr, index) => {
-                            let questionObj;
                             try {
-                                questionObj = JSON.parse(qStr);
-                            } catch {
-                                return <p key={index}>Invalid JSON</p>;
-                            }
+                                const questionObj = JSON.parse(qStr);
 
-                            const handleFieldChange = (field, value) => {
-                                const updated = { ...questionObj, [field]: value };
-                                const updatedString = JSON.stringify(updated, null, 2);
-                                setQuestionsJson(prev => {
-                                    const copy = [...prev];
-                                    copy[index] = updatedString;
-                                    return copy;
-                                });
-                            };
-                            const handleDelete = (i) => {
-                                const newQuestions = questionsJson.filter((_, idx) => idx !== i);
-                                setQuestionsJson(newQuestions);
-                            };
+                                const handleFieldChangeWrapper = (field, value, optionIndex = null) => {
+                                    handleFieldChange(index, field, value, optionIndex);
+                                };
 
-                            return (
-                                <div key={index} className="questionBox">
-                                    <div className="delete">
-                                        <select
-                                            value={questionObj.difficulty_level}
-                                            onChange={(e) => handleFieldChange("difficulty_level", e.target.value)}
-                                            className="difficulty"
-                                        >
-                                            <option value="">Select Difficulty</option>
-                                            <option value="EASY">Easy</option>
-                                            <option value="MEDIUM">Medium</option>
-                                            <option value="HARD">Hard</option>
-                                        </select>
-                                        <h4>QUESTION {index + 1}</h4>
+                                const handleDeleteWrapper = () => {
+                                    handleDelete(index);
+                                };
 
-                                        <button onClick={() => handleDelete(index)}>
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width="30" height="20"
-                                                fill="red"
-                                                viewBox="0 0 16 16"
+                                return (
+                                    <div key={index} className="questionBox">
+                                        <div className="delete">
+                                            <select
+                                                value={questionObj.difficulty_level}
+                                                onChange={(e) => handleFieldChangeWrapper("difficulty_level", e.target.value)}
+                                                className="difficulty"
                                             >
-                                                <path d="M5.5 5.5a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0v-6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0v-6z" />
-                                                <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1h-1v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4h-1a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1zM5 4v9a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V4H5z" />
-                                            </svg>
-                                        </button>
-                                    </div>
+                                                <option value="">Select Difficulty</option>
+                                                <option value="EASY">Easy</option>
+                                                <option value="MEDIUM">Medium</option>
+                                                <option value="HARD">Hard</option>
+                                            </select>
 
-                                    <TextField
-                                        label="Question Text"
-                                        variant="outlined"
-                                        fullWidth
-                                        value={questionObj.question_text}
-                                        onChange={(e) => handleFieldChange("question_text", e.target.value)}
-                                        InputLabelProps={{
-                                            shrink: false,
-                                            sx: {
-                                                left: '50%',
-                                                transform: 'translateX(-50%) translateY(-50%)',
-                                                pointerEvents: 'none',
-                                                fontWeight: 'bold',
-                                                width: '100%',
-                                                textAlign: 'center',
-                                            },
-                                        }}
-                                        inputProps={{
-                                            style: {
-                                                textAlign: 'center',
-                                                border: 'none',
-                                            },
-                                        }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
+                                            <h4>QUESTION {index + 1}</h4>
+
+                                            <button onClick={handleDeleteWrapper}>
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="30"
+                                                    height="20"
+                                                    fill="red"
+                                                    viewBox="0 0 16 16"
+                                                >
+                                                    <path d="M5.5 5.5a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0v-6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0v-6z" />
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M14.5 3a1 1 0 0 1-1 1h-1v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4h-1a1 1 0 0 1 0-2h3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3a1 1 0 0 1 1 1zM5 4v9a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V4H5z"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <TextField
+                                            label="Question Text"
+                                            variant="outlined"
+                                            fullWidth
+                                            value={questionObj.question_text}
+                                            onChange={(e) => handleFieldChangeWrapper("question_text", e.target.value)}
+                                            InputLabelProps={{
+                                                shrink: false,
+                                                sx: {
+                                                    left: '50%',
+                                                    transform: 'translateX(-50%) translateY(-50%)',
+                                                    pointerEvents: 'none',
+                                                    fontWeight: 'bold',
+                                                    width: '100%',
+                                                    textAlign: 'center',
+                                                },
+                                            }}
+                                            inputProps={{
+                                                style: {
+                                                    textAlign: 'center',
                                                     border: 'none',
                                                 },
-                                            },
-                                        }}
-                                    />
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    '& fieldset': {
+                                                        border: 'none',
+                                                    },
+                                                },
+                                            }}
+                                        />
 
-                                    <TextField
-                                        label="Explanation"
-                                        multiline
-                                        fullWidth
-                                        value={String(questionObj.answer_explanation_content).trim()}
-                                        onChange={(e) => handleFieldChange("answer_explanation_content", e.target.value)}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                            sx: {
-                                                textAlign: 'center',
-                                                width: '100%',
-                                                transform: 'translateX(-50%) translateY(-50%)',
-                                                left: '50%',
-                                                fontWeight: 'bold',
-                                                bgcolor: 'white',
-                                                padding: '0 8px',
-                                            },
-                                        }}
-                                        inputProps={{
-                                            style: {
-                                                overflow: 'hidden',
-                                                width: '100%',
-                                                padding: 0,
-                                                minHeight: '100px',
-                                                textAlign: 'left',
-                                            },
-                                            onInput: (e) => {
-                                                e.target.style.height = 'auto';
-                                                e.target.style.height = e.target.scrollHeight + 'px';
-                                            },
-                                        }}
-                                        sx={{
-                                            marginTop: '20px',
-                                            marginBottom: '20px',
-                                        }}
-                                        variant="outlined"
-                                    />
+                                        <TextField
+                                            label="Explanation"
+                                            multiline
+                                            fullWidth
+                                            value={String(questionObj.answer_explanation_content).trim()}
+                                            onChange={(e) => handleFieldChangeWrapper("answer_explanation_content", e.target.value)}
+                                            InputLabelProps={{
+                                                shrink: true,
+                                                sx: {
+                                                    textAlign: 'center',
+                                                    width: '100%',
+                                                    transform: 'translateX(-50%) translateY(-50%)',
+                                                    left: '50%',
+                                                    fontWeight: 'bold',
+                                                    bgcolor: 'white',
+                                                    padding: '0 8px',
+                                                },
+                                            }}
+                                            inputProps={{
+                                                style: {
+                                                    overflow: 'hidden',
+                                                    width: '100%',
+                                                    padding: 0,
+                                                    minHeight: '100px',
+                                                    textAlign: 'left',
+                                                },
+                                                onInput: (e) => {
+                                                    e.target.style.height = 'auto';
+                                                    e.target.style.height = e.target.scrollHeight + 'px';
+                                                },
+                                            }}
+                                            sx={{
+                                                marginTop: '20px',
+                                                marginBottom: '20px',
+                                            }}
+                                            variant="outlined"
+                                        />
 
-                                    <b>Options:</b>
-                                    {Object.entries(questionObj.options).map(([optionText, correctness], optIdx) => (
-                                        <div key={optIdx} className="optionRow">
-                                            <input
-                                                type="text"
-                                                value={optionText}
-                                                onChange={(e) => {
-                                                    const newKey = e.target.value;
-                                                    const newOptions = { ...questionObj.options };
-                                                    const value = newOptions[optionText];
-                                                    delete newOptions[optionText];
-                                                    newOptions[newKey] = value;
-                                                    handleFieldChange("options", newOptions);
-                                                }}
-                                                className="editableInput optionKey"
-                                            />
-                                            <select
-                                                value={correctness}
-                                                onChange={(e) => {
-                                                    const newOptions = { ...questionObj.options };
-                                                    newOptions[optionText] = e.target.value;
-                                                    handleFieldChange("options", newOptions);
-                                                }}
-                                                className="optionSelect"
-                                                style={{
-                                                    backgroundColor: correctness === "TRUE" ? "#d4edda" : "#f8d7da",
-                                                    border: "1px solid #ccc",
-                                                    borderRadius: "4px",
-                                                    margin: "8px 0 16px",
-                                                    height: "auto",
-                                                    padding: "5px 5px 0px 5px"
-                                                }}
-                                            >
-                                                <option value="TRUE">TRUE</option>
-                                                <option value="FALSE">FALSE</option>
-                                            </select>
-                                        </div>
-                                    ))}
-                                </div>
-                            );
+                                        <b>Options:</b>
+                                        {(questionObj.options).map((option, optIdx) => (
+                                            <div key={optIdx} className="optionRow">
+                                                <input
+                                                    type="text"
+                                                    value={option.text}
+                                                    onChange={(e) => handleOptionTextChange(index, optIdx, e.target.value)}
+                                                    className="editableInput optionKey"
+                                                />
+
+                                                <select
+                                                    value={option.correct}
+                                                    onChange={(e) => handleOptionCorrectChange(index, optIdx, e.target.value)}
+                                                    className="optionSelect"
+                                                    style={{
+                                                        backgroundColor: option.correct === "TRUE" ? "#d4edda" : "#f8d7da",
+                                                        border: "1px solid #ccc",
+                                                        borderRadius: "4px",
+                                                        margin: "8px 0 16px",
+                                                        height: "auto",
+                                                        padding: "5px 5px 0px 5px"
+                                                    }}
+                                                >
+                                                    <option value="TRUE">TRUE</option>
+                                                    <option value="FALSE">FALSE</option>
+                                                </select>
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            } catch (error) {
+                                console.error("Error parsing JSON:", error);
+                                return <p key={index}>Invalid JSON</p>;
+                            }
                         })}
                     </div>
                 )}
 
-                {/* Updated Download Section */}
+                {/* Download Section */}
                 <div style={{ padding: '20px', textAlign: 'center' }}>
                     <button
                         onClick={downloadCSV}
@@ -629,6 +768,7 @@ const Theoretical = () => {
                     >
                         Download CSV ({questionsJson.length} questions)
                     </button>
+
                     {questionsJson.length === 0 && (
                         <p style={{ color: '#666', marginTop: '8px' }}>
                             Generate questions first to enable download
