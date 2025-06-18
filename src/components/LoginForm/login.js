@@ -49,7 +49,7 @@ const LoginForm = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch("https://ravik00111110.pythonanywhere.com/api/auth/login/", {
+            const response = await fetch("https://cors-anywhere.herokuapp.com/https://ravik00111110.pythonanywhere.com/api/auth/login/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
