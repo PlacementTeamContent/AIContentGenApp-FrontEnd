@@ -64,9 +64,12 @@ const DownloadCSVButton = ({ questionJSONs, technology, topicTag, subTopicTag, d
                 `DIFFICULTY_${(difficulty_level || '').toUpperCase()}`,
                 'SOURCE_GPT',
                 'IN_OFFLINE_EXAM',
-                'COMPANY_UNKNOWN',
+                'NIAT',
                 'IS_PUBLIC',
-                question_id
+                question_id,
+                'MODULE_name',
+                'UNIT_name',
+                'COURSE_name',
             ].filter(Boolean).join('\n');
 
             const options_content_type = 'MARKDOWN';

@@ -98,7 +98,19 @@ const CodeAnalysis = () => {
                 parsedQuestions = [];
             }
 
-            const stringifiedQuestions = parsedQuestions.map(q => JSON.stringify(q, null, 2));
+            // Convert options object to array format to preserve order
+            const processedQuestions = parsedQuestions.map(q => {
+                if (q.options && typeof q.options === 'object') {
+                    const optionsArray = Object.entries(q.options).map(([text, correctness]) => ({
+                        text,
+                        correctness
+                    }));
+                    return { ...q, options: optionsArray };
+                }
+                return q;
+            });
+
+            const stringifiedQuestions = processedQuestions.map(q => JSON.stringify(q, null, 2));
             setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
         } catch {
             // handle fetch error silently or add notification as needed
@@ -245,7 +257,6 @@ const CodeAnalysis = () => {
                             <option value="TOPIC_JAVA_CODING_ANALYSIS">TOPIC_JAVA_CODING_ANALYSIS</option>
                             <option value="TOPIC_C_CODING_ANALYSIS">TOPIC_C_CODING_ANALYSIS</option>
                             <option value="TOPIC_JS_CODING_ANALYSIS">TOPIC_JS_CODING_ANALYSIS</option>
-
                             <option value="TOPIC_HTML_CSS_CODING_ANALYSIS">TOPIC_HTML_CSS_CODING_ANALYSIS</option>
                         </select>
 
@@ -348,9 +359,23 @@ const CodeAnalysis = () => {
                                     return copy;
                                 });
                             };
+
                             const handleDelete = (i) => {
                                 const newQuestions = questionsJson.filter((_, idx) => idx !== i);
                                 setQuestionsJson(newQuestions);
+                            };
+
+                            // Handle option changes while preserving order
+                            const handleOptionTextChange = (optionIndex, newText) => {
+                                const newOptions = [...questionObj.options];
+                                newOptions[optionIndex] = { ...newOptions[optionIndex], text: newText };
+                                handleFieldChange("options", newOptions);
+                            };
+
+                            const handleOptionCorrectnessChange = (optionIndex, newCorrectness) => {
+                                const newOptions = [...questionObj.options];
+                                newOptions[optionIndex] = { ...newOptions[optionIndex], correctness: newCorrectness };
+                                handleFieldChange("options", newOptions);
                             };
 
                             return (
@@ -489,31 +514,20 @@ const CodeAnalysis = () => {
                                     />
 
                                     <b>Options:</b>
-                                    {Object.entries(questionObj.options).map(([optionText, correctness], optIdx) => (
+                                    {questionObj.options && Array.isArray(questionObj.options) && questionObj.options.map((option, optIdx) => (
                                         <div key={optIdx} className="optionRow">
                                             <input
                                                 type="text"
-                                                value={optionText}
-                                                onChange={(e) => {
-                                                    const newKey = e.target.value;
-                                                    const newOptions = { ...questionObj.options };
-                                                    const value = newOptions[optionText];
-                                                    delete newOptions[optionText];
-                                                    newOptions[newKey] = value;
-                                                    handleFieldChange("options", newOptions);
-                                                }}
+                                                value={option.text}
+                                                onChange={(e) => handleOptionTextChange(optIdx, e.target.value)}
                                                 className="editableInput optionKey"
                                             />
                                             <select
-                                                value={correctness}
-                                                onChange={(e) => {
-                                                    const newOptions = { ...questionObj.options };
-                                                    newOptions[optionText] = e.target.value;
-                                                    handleFieldChange("options", newOptions);
-                                                }}
+                                                value={option.correctness}
+                                                onChange={(e) => handleOptionCorrectnessChange(optIdx, e.target.value)}
                                                 className="optionSelect"
                                                 style={{
-                                                    backgroundColor: correctness === "TRUE" ? "#d4edda" : "#f8d7da",
+                                                    backgroundColor: option.correctness === "TRUE" ? "#d4edda" : "#f8d7da",
                                                     border: "1px solid #ccc",
                                                     borderRadius: "4px",
                                                     margin: "8px 0 16px",
