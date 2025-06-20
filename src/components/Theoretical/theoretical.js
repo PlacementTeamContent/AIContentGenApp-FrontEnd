@@ -189,11 +189,7 @@ const Theoretical = () => {
         return updated;
     };
 
-    const handleLogout = () => {
-        Cookies.remove("accessToken");
-        Cookies.remove("refreshToken");
-        navigate("/login");
-    };
+
 
     // Download questions as CSV
     const downloadCSV = () => {
