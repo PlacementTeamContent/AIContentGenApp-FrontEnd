@@ -7,8 +7,6 @@ const DownloadCSVButton = ({ questionJSONs, technology, topicTag, subTopicTag, d
         return `"${stringVal.replace(/"/g, '""')}"`;
     };
 
-
-
     const downloadCSV = () => {
         const csvRows = [];
 
@@ -80,10 +78,26 @@ const DownloadCSVButton = ({ questionJSONs, technology, topicTag, subTopicTag, d
             const c_options = [];
             const w_options = [];
 
-            Object.entries(options || {}).forEach(([key, val]) => {
-                if (val === 'TRUE') c_options.push(`OPTION : ${key}`);
-                else w_options.push(`OPTION: ${key}`);
-            });
+            // Handle both array format (current) and object format (original)
+            if (Array.isArray(options)) {
+                // Handle array format: [{text: "option1", correctness: "TRUE"}, ...]
+                options.forEach((option) => {
+                    if (option.correctness === 'TRUE' || option.correctness === true) {
+                        c_options.push(`OPTION : ${option.text}`);
+                    } else {
+                        w_options.push(`OPTION: ${option.text}`);
+                    }
+                });
+            } else if (options && typeof options === 'object') {
+                // Handle object format: {"option1": "TRUE", "option2": "FALSE", ...}
+                Object.entries(options).forEach(([key, val]) => {
+                    if (val === 'TRUE' || val === true) {
+                        c_options.push(`OPTION : ${key}`);
+                    } else {
+                        w_options.push(`OPTION: ${key}`);
+                    }
+                });
+            }
 
             const row = [
                 question_id,
@@ -116,7 +130,7 @@ const DownloadCSVButton = ({ questionJSONs, technology, topicTag, subTopicTag, d
         const a = document.createElement('a');
         a.setAttribute('hidden', '');
         a.setAttribute('href', url);
-        a.setAttribute('download', 'questions.csv');
+        a.setAttribute('download', `${technology}_${topicTag}_questions_${new Date().toISOString().split('T')[0]}.csv`);
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -129,13 +143,13 @@ const DownloadCSVButton = ({ questionJSONs, technology, topicTag, subTopicTag, d
             onClick={downloadCSV}
             style={{
                 padding: '8px 16px',
-                background: disabled ? '#6c757d' : '#28a745', // Gray background when disabled
+                background: disabled ? '#6c757d' : '#28a745',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '4px',
                 cursor: disabled ? 'not-allowed' : 'pointer',
-                opacity: disabled ? 0.5 : 1, // Note: no quotes around 0.5 and 1
-                transition: 'all 0.2s ease' // Optional: smooth transition
+                opacity: disabled ? 0.5 : 1,
+                transition: 'all 0.2s ease'
             }}
         >
             Download CSV
