@@ -60,64 +60,74 @@ const CodeAnalysis = () => {
     };
 
     const requestQuestions = async () => {
-        if (!allFieldsFilled()) return;
+    if (!allFieldsFilled()) return;
 
-        setLoading(true);
-        const currentPrompt = updateMessage(rawPrompt);
+    setLoading(true);
+    const currentPrompt = updateMessage(rawPrompt);
 
-        try {
-            const response = await authFetch(
-                "https://ravik00111110.pythonanywhere.com/api/content-gen/generate/",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        prompt: currentPrompt,
-                        difficulty,
-                        question_type: "MCQ",
-                        topic: topicTag.toUpperCase(),
-                        subtopic: subTopicTag.toUpperCase(),
-                        number_of_question: numberOfQuestions
-                    }),
-                },
-                navigate,
-                200000,
-                true
-            );
+    try {
+        const response = await authFetch(
+            "https://ravik00111110.pythonanywhere.com/api/content-gen/generate/",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    prompt: currentPrompt,
+                    difficulty,
+                    question_type: "MCQ",
+                    topic: topicTag.toUpperCase(),
+                    subtopic: subTopicTag.toUpperCase(),
+                    number_of_question: numberOfQuestions
+                }),
+            },
+            navigate,
+            200000,
+            true
+        );
 
-            const data = await response.json();
+        const data = await response.json();
 
-            let parsedQuestions;
-            try {
-                parsedQuestions = JSON.parse(data.message.trim());
-            } catch {
-                parsedQuestions = [];
-            }
-
-            if (!Array.isArray(parsedQuestions)) {
-                parsedQuestions = [];
-            }
-
-            // Convert options object to array format to preserve order
-            const processedQuestions = parsedQuestions.map(q => {
-                if (q.options && typeof q.options === 'object') {
-                    const optionsArray = Object.entries(q.options).map(([text, correctness]) => ({
-                        text,
-                        correctness
-                    }));
-                    return { ...q, options: optionsArray };
-                }
-                return q;
-            });
-
-            const stringifiedQuestions = processedQuestions.map(q => JSON.stringify(q, null, 2));
-            setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
-        } catch {
-            // handle fetch error silently or add notification as needed
-        } finally {
-            setLoading(false);
+        // Remove the ```json and the closing ```, if present
+        let message = data.message.trim();
+        if (message.startsWith("```json")) {
+            message = message.substring(7); // Remove "```json" from the start
         }
-    };
+        if (message.endsWith("```")) {
+            message = message.slice(0, -3); // Remove "```" from the end
+        }
+
+        let parsedQuestions;
+        try {
+            parsedQuestions = JSON.parse(message);
+        } catch {
+            parsedQuestions = [];
+        }
+
+        if (!Array.isArray(parsedQuestions)) {
+            parsedQuestions = [];
+        }
+
+        // Convert options object to array format to preserve order
+        const processedQuestions = parsedQuestions.map(q => {
+            if (q.options && typeof q.options === 'object') {
+                const optionsArray = Object.entries(q.options).map(([text, correctness]) => ({
+                    text,
+                    correctness
+                }));
+                return { ...q, options: optionsArray };
+            }
+            return q;
+        });
+
+        const stringifiedQuestions = processedQuestions.map(q => JSON.stringify(q, null, 2));
+        setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
+    } catch {
+        // handle fetch error silently or add notification as needed
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     const handleTopicChange = (e) => {
         setTopicTag(e.target.value);

@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { authFetch } from "../../utils/authFetch";
 import { useAuthGuard } from "../../utils/useAuthGuard";
 import Navbar from "../Navbar/navbar";
-import './theoretical.css';
+import './TCS.css';
 import { TextField } from "@mui/material";
 
-const Theoretical = () => {
+const TheoreticalCodeSnippet = () => {
     useAuthGuard();
     const navigate = useNavigate();
 
@@ -25,13 +25,13 @@ const Theoretical = () => {
 
     // Technology mapping
     const techToProcessName = {
-        CPP: "theory_mcq_cpp",
-        Python: "theory_mcq_python",
+        CPP: "theory_cs_mcq_cpp",
+        Python: "theory_cs_mcq_python",
         Java: "",
         C: "",
-        Javascript: "theory_mcq_javascript",
+        Javascript: "theory_cs_mcq_javascript",
         Sql: "",
-        HTML_CSS: "theory_mcq_html_css"
+        HTML_CSS: ""
     };
 
     // Get difficulty counts for display
@@ -64,8 +64,50 @@ const Theoretical = () => {
         );
     };
 
-    // Helper function to transform options from object to array
-    /*const transformOptionsToArray = (questionObj) => {
+   
+
+    // Request questions from API
+    const requestQuestions = async () => {
+        if (!allFieldsFilled()) return;
+
+        setLoading(true);
+        const currentPrompt = updateMessage(rawPrompt);
+
+        try {
+            const response = await authFetch(
+                "https://ravik00111110.pythonanywhere.com/api/content-gen/generate/",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        prompt: currentPrompt,
+                        difficulty,
+                        question_type: "MCQ",
+                        topic: topicTag.toUpperCase(),
+                        subtopic: subTopicTag.toUpperCase(),
+                        number_of_question: numberOfQuestions
+                    }),
+                },
+                navigate,
+                200000,
+                true
+            );
+
+            const data = await response.json();
+            console.log(data)
+            let parsedQuestions;
+
+            try {
+                parsedQuestions = JSON.parse(data.message.trim());
+            } catch {
+                parsedQuestions = [];
+            }
+
+            if (!Array.isArray(parsedQuestions)) {
+                parsedQuestions = [];
+            }
+             // Helper function to transform options from object to array
+    const transformOptionsToArray = (questionObj) => {
         if (questionObj && typeof questionObj.options === 'object' && !Array.isArray(questionObj.options)) {
             const optionsArray = Object.entries(questionObj.options).map(([text, correct]) => ({
                 text: text,
@@ -74,78 +116,20 @@ const Theoretical = () => {
             return { ...questionObj, options: optionsArray };
         }
         return questionObj;
-    };*/
+    };
 
-    // Request questions from API
-    const requestQuestions = async () => {
-    if (!allFieldsFilled()) return;
+            // Transform options to array before stringifying
+            const stringifiedQuestions = parsedQuestions.map(q =>
+                JSON.stringify(transformOptionsToArray(q), null, 2)
+            );
 
-    setLoading(true);
-    const currentPrompt = updateMessage(rawPrompt);
-
-    try {
-        const response = await authFetch(
-            "https://ravik00111110.pythonanywhere.com/api/content-gen/generate/",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    prompt: currentPrompt,
-                    difficulty,
-                    question_type: "MCQ",
-                    topic: topicTag.toUpperCase(),
-                    subtopic: subTopicTag.toUpperCase(),
-                    number_of_question: numberOfQuestions
-                }),
-            },
-            navigate,
-            200000,
-            true
-        );
-
-        const data = await response.json();
-
-        // Remove the ```json and the closing ```, if present
-        let message = data.message.trim();
-        if (message.startsWith("```json")) {
-            message = message.substring(7); // Remove "```json" from the start
-        }
-        if (message.endsWith("```")) {
-            message = message.slice(0, -3); // Remove "```" from the end
-        }
-
-        let parsedQuestions;
-        try {
-            parsedQuestions = JSON.parse(message);
+            setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
         } catch {
-            parsedQuestions = [];
+            // handle fetch error silently or add notification as needed
+        } finally {
+            setLoading(false);
         }
-
-        if (!Array.isArray(parsedQuestions)) {
-            parsedQuestions = [];
-        }
-
-        // Convert options object to array format to preserve order
-        const processedQuestions = parsedQuestions.map(q => {
-            if (q.options && typeof q.options === 'object') {
-                const optionsArray = Object.entries(q.options).map(([text, correctness]) => ({
-                    text,
-                    correctness
-                }));
-                return { ...q, options: optionsArray };
-            }
-            return q;
-        });
-
-        const stringifiedQuestions = processedQuestions.map(q => JSON.stringify(q, null, 2));
-        setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
-    } catch {
-        // handle fetch error silently or add notification as needed
-    } finally {
-        setLoading(false);
-    }
-};
-
+    };
 
     // Handle topic change
     const handleTopicChange = (e) => {
@@ -427,7 +411,7 @@ const Theoretical = () => {
             <Navbar />
             <div className="containerCA">
                 <fieldset className="codeAnalysis">
-                    <legend className="codeAnalysisLegand">Theoretical MCQ Question</legend>
+                    <legend className="codeAnalysisLegand">Theoretical with Code Snippet Question</legend>
 
                     <div className="details-text-prompt">
                         <h3>----- Details for Prompt -----</h3>
@@ -795,4 +779,4 @@ const Theoretical = () => {
     );
 };
 
-export default Theoretical;
+export default TheoreticalCodeSnippet;

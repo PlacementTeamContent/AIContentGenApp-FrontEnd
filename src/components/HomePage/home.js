@@ -35,7 +35,7 @@ const HomePage = () => {
                                 <button className="item" onClick={() => navigate('../Theoretical')}>Theoretical</button>
                                 <button className="item" onClick={() => navigate('../CodeAnalysis')}>Code Analysis</button>
                                 {/*change the class name into item whenever the implementation of the specific route is done so the it won't display any hover text*/}
-                                <button className="item1">Theoretical with Code Snippet</button>
+                                <button className="item" onClick={()=> navigate("../TheoreticalCodeSnippetMCQs")}>Theoretical with Code Snippet</button>
                             </div>
                         </fieldset>
                     </div>
