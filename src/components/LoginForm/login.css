@@ -3,19 +3,29 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 93vh;
     text-align: center;
-    position: relative; /* Added for loading overlay */
+    position: relative;
 }
+
 
 .login {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: relative; /* Added for loading overlay */
+    position: relative;
+    max-height: 50vh;
+    width: 25%;
+    padding: 30px;
+    background-color: white; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1); 
 }
+
+.login-heading{
+    margin-bottom: 25px;
+    color: #666;
+}
+
 
 h1 {
     font-weight: bolder;
@@ -23,7 +33,6 @@ h1 {
 
 .login-button {
     height: 50px;
-    width: 100px;
     border-radius: 50px;
     background-color: aquamarine;
     font-weight: bolder;
@@ -50,13 +59,13 @@ h1 {
     animation: pulse 1.5s infinite;
 }
 
-input {
+.login input {
     height: 30px;
-    width: 150px;
     padding: 5px;
     border: 2px solid #ccc;
     border-radius: 4px;
     transition: border-color 0.3s ease;
+    margin-bottom: 35px;
 }
 
 input:disabled {
@@ -158,4 +167,13 @@ input:disabled {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+label{
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.pass{
+    margin-right: 10px;
 }

@@ -86,11 +86,21 @@ const CodeAnalysis = () => {
             );
 
             const data = await response.json();
-            console.log(data.message);
+
+            // Clean the response message
+            let message = data.message.trim();
+            if (message.startsWith("```json")) {
+                message = message.substring(7);
+            }
+            if (message.endsWith("```")) {
+                message = message.slice(0, -3);
+            }
+
             let parsedQuestions;
             try {
-                parsedQuestions = JSON.parse(data.message.trim());
-            } catch {
+                parsedQuestions = JSON.parse(message);
+            } catch (parseError) {
+                console.error("Failed to parse questions:", parseError);
                 parsedQuestions = [];
             }
 
@@ -98,9 +108,9 @@ const CodeAnalysis = () => {
                 parsedQuestions = [];
             }
 
-            // Convert options object to array format to preserve order
+            // Process options
             const processedQuestions = parsedQuestions.map(q => {
-                if (q.options && typeof q.options === 'object') {
+                if (q.options && typeof q.options === 'object' && !Array.isArray(q.options)) {
                     const optionsArray = Object.entries(q.options).map(([text, correctness]) => ({
                         text,
                         correctness
@@ -112,12 +122,15 @@ const CodeAnalysis = () => {
 
             const stringifiedQuestions = processedQuestions.map(q => JSON.stringify(q, null, 2));
             setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
-        } catch {
-            // handle fetch error silently or add notification as needed
+
+        } catch (error) {
+            console.error("Error generating questions:", error);
+            // Add user notification here
         } finally {
             setLoading(false);
         }
     };
+
 
     const handleTopicChange = (e) => {
         setTopicTag(e.target.value);

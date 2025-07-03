@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import "./login.css";
 
 const LoginForm = () => {
@@ -8,10 +9,12 @@ const LoginForm = () => {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [currentEmoji, setCurrentEmoji] = useState("🚀");
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     // Fun loading emojis sequence
-    const loadingEmojis = ["🚀", "✨", "🎉", "🌟", "⭐", "💫", "🔥", "🎊", "🌈", "🦄"];
+    
+    
     const loadingMessages = [
         "Preparing your space...",
         "Sprinkling magic dust...",
@@ -31,6 +34,7 @@ const LoginForm = () => {
 
     // Emoji animation effect during loading
     useEffect(() => {
+        const loadingEmojis = ["🚀", "✨", "🎉", "🌟", "⭐", "💫", "🔥", "🎊", "🌈", "🦄"];
         let emojiInterval;
         if (isLoading) {
             emojiInterval = setInterval(() => {
@@ -77,12 +81,16 @@ const LoginForm = () => {
         }
     };
 
+    const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+    
+
     return (
         <form onSubmit={handleLogin}>
             <div className="container">
                 <div className="login">
-                    <fieldset>
-                        <legend>Login</legend>
+                        <h1 className="login-heading">Login</h1>
 
                         {/* Loading Animation Overlay */}
                         {isLoading && (
@@ -94,15 +102,11 @@ const LoginForm = () => {
                                     <p className="loading-message">
                                         {loadingMessages[Math.floor(Math.random() * loadingMessages.length)]}
                                     </p>
-                                    <div className="loading-dots">
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                    </div>
                                 </div>
                             </div>
                         )}
-
+                        
+                        <label>User Name</label>
                         <input
                             type="text"
                             placeholder="Username"
@@ -110,15 +114,22 @@ const LoginForm = () => {
                             onChange={(e) => setUsername(e.target.value)}
                             required
                             disabled={isLoading}
-                        /><br />
+                        />
+                        <label>Password</label>
                         <input
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             disabled={isLoading}
-                        /><br />
+                        />
+                        <div className="show-password">
+                            <span onClick={togglePasswordVisibility} style={{ cursor: 'pointer' }}>
+                            {showPassword ? <p><span className="pass"><FiEyeOff /></span>Hide Password</p> : <p><span className="pass"><FiEye /></span>Show Password</p>}
+                        </span>
+                        </div>
+                        <br />
                         <button
                             className={`login-button ${isLoading ? 'loading' : ''}`}
                             type="submit"
@@ -133,7 +144,7 @@ const LoginForm = () => {
                                 'Login'
                             )}
                         </button>
-                    </fieldset>
+
                 </div>
             </div>
         </form>

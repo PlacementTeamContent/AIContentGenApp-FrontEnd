@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { authFetch } from "../../utils/authFetch";
 import { useAuthGuard } from "../../utils/useAuthGuard";
 import Navbar from "../Navbar/navbar";
-import './theoretical.css';
+import './TCS.css';
 import { TextField } from "@mui/material";
 
-const Theoretical = () => {
+const TheoreticalCodeSnippet = () => {
     useAuthGuard();
     const navigate = useNavigate();
 
@@ -25,13 +25,13 @@ const Theoretical = () => {
 
     // Technology mapping
     const techToProcessName = {
-        CPP: "theory_mcq_cpp",
-        Python: "theory_mcq_python",
+        CPP: "theory_cs_mcq_cpp",
+        Python: "theory_cs_mcq_python",
         Java: "",
         C: "",
-        Javascript: "theory_mcq_javascript",
+        Javascript: "theory_cs_mcq_javascript",
         Sql: "",
-        HTML_CSS: "theory_mcq_html_css"
+        HTML_CSS: ""
     };
 
     // Get difficulty counts for display
@@ -64,17 +64,7 @@ const Theoretical = () => {
         );
     };
 
-    // Helper function to transform options from object to array
-    const transformOptionsToArray = (questionObj) => {
-        if (questionObj && typeof questionObj.options === 'object' && !Array.isArray(questionObj.options)) {
-            const optionsArray = Object.entries(questionObj.options).map(([text, correct]) => ({
-                text: text,
-                correct: correct
-            }));
-            return { ...questionObj, options: optionsArray };
-        }
-        return questionObj;
-    };
+   
 
     // Request questions from API
     const requestQuestions = async () => {
@@ -106,10 +96,10 @@ const Theoretical = () => {
             const data = await response.json();
             let message = data.message.trim();
         if (message.startsWith("```json")) {
-            message = message.substring(7); // Remove "```json" from the start
+            message = message.substring(7);
         }
         if (message.endsWith("```")) {
-            message = message.slice(0, -3); // Remove "```" from the end
+            message = message.slice(0, -3);
         }
 
         let parsedQuestions;
@@ -118,6 +108,21 @@ const Theoretical = () => {
         } catch {
             parsedQuestions = [];
         }
+
+            if (!Array.isArray(parsedQuestions)) {
+                parsedQuestions = [];
+            }
+             // Helper function to transform options from object to array
+    const transformOptionsToArray = (questionObj) => {
+        if (questionObj && typeof questionObj.options === 'object' && !Array.isArray(questionObj.options)) {
+            const optionsArray = Object.entries(questionObj.options).map(([text, correct]) => ({
+                text: text,
+                correct: correct
+            }));
+            return { ...questionObj, options: optionsArray };
+        }
+        return questionObj;
+    };
 
             // Transform options to array before stringifying
             const stringifiedQuestions = parsedQuestions.map(q =>
@@ -412,7 +417,7 @@ const Theoretical = () => {
             <Navbar />
             <div className="containerCA">
                 <fieldset className="codeAnalysis">
-                    <legend className="codeAnalysisLegand">Theoretical MCQ Question</legend>
+                    <legend className="codeAnalysisLegand">Theoretical with Code Snippet Question</legend>
 
                     <div className="details-text-prompt">
                         <h3>----- Details for Prompt -----</h3>
@@ -499,8 +504,10 @@ const Theoretical = () => {
                             <option value="default">Choose Topic Tag</option>
                             <option value="TOPIC_HTML_CSS_MCQ">TOPIC_HTML_CSS_MCQ</option>
                             <option value="TOPIC_PYTHON_MCQ">TOPIC_PYTHON_MCQ</option>
-                            <option value="TOPIC_CPP_MCQ">TOPIC_CPP_MCQ</option>
                             <option value="TOPIC_JS_MCQ">TOPIC_JS_MCQ</option>
+                            <option value="TOPIC_CPP_MCQ">TOPIC_CPP_MCQ</option>
+
+
                         </select>
 
                         <input
@@ -567,7 +574,6 @@ const Theoretical = () => {
                             flexWrap: "wrap"
                         }}>
                             <h2 style={{ margin: 0 }}>Edit Generated Questions</h2>
-
                             <div style={{
                                 backgroundColor: "#f1f3f5",
                                 borderRadius: "8px",
@@ -779,4 +785,4 @@ const Theoretical = () => {
     );
 };
 
-export default Theoretical;
+export default TheoreticalCodeSnippet;
