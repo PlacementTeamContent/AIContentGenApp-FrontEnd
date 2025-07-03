@@ -60,73 +60,76 @@ const CodeAnalysis = () => {
     };
 
     const requestQuestions = async () => {
-    if (!allFieldsFilled()) return;
+        if (!allFieldsFilled()) return;
 
-    setLoading(true);
-    const currentPrompt = updateMessage(rawPrompt);
+        setLoading(true);
+        const currentPrompt = updateMessage(rawPrompt);
 
-    try {
-        const response = await authFetch(
-            "https://ravik00111110.pythonanywhere.com/api/content-gen/generate/",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    prompt: currentPrompt,
-                    difficulty,
-                    question_type: "MCQ",
-                    topic: topicTag.toUpperCase(),
-                    subtopic: subTopicTag.toUpperCase(),
-                    number_of_question: numberOfQuestions
-                }),
-            },
-            navigate,
-            200000,
-            true
-        );
-
-        const data = await response.json();
-
-        // Remove the ```json and the closing ```, if present
-        let message = data.message.trim();
-        if (message.startsWith("```json")) {
-            message = message.substring(7); // Remove "```json" from the start
-        }
-        if (message.endsWith("```")) {
-            message = message.slice(0, -3); // Remove "```" from the end
-        }
-
-        let parsedQuestions;
         try {
-            parsedQuestions = JSON.parse(message);
-        } catch {
-            parsedQuestions = [];
-        }
+            const response = await authFetch(
+                "https://ravik00111110.pythonanywhere.com/api/content-gen/generate/",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        prompt: currentPrompt,
+                        difficulty,
+                        question_type: "MCQ",
+                        topic: topicTag.toUpperCase(),
+                        subtopic: subTopicTag.toUpperCase(),
+                        number_of_question: numberOfQuestions
+                    }),
+                },
+                navigate,
+                200000,
+                true
+            );
 
-        if (!Array.isArray(parsedQuestions)) {
-            parsedQuestions = [];
-        }
+            const data = await response.json();
 
-        // Convert options object to array format to preserve order
-        const processedQuestions = parsedQuestions.map(q => {
-            if (q.options && typeof q.options === 'object') {
-                const optionsArray = Object.entries(q.options).map(([text, correctness]) => ({
-                    text,
-                    correctness
-                }));
-                return { ...q, options: optionsArray };
+            // Clean the response message
+            let message = data.message.trim();
+            if (message.startsWith("```json")) {
+                message = message.substring(7);
             }
-            return q;
-        });
+            if (message.endsWith("```")) {
+                message = message.slice(0, -3);
+            }
 
-        const stringifiedQuestions = processedQuestions.map(q => JSON.stringify(q, null, 2));
-        setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
-    } catch {
-        // handle fetch error silently or add notification as needed
-    } finally {
-        setLoading(false);
-    }
-};
+            let parsedQuestions;
+            try {
+                parsedQuestions = JSON.parse(message);
+            } catch (parseError) {
+                console.error("Failed to parse questions:", parseError);
+                parsedQuestions = [];
+            }
+
+            if (!Array.isArray(parsedQuestions)) {
+                parsedQuestions = [];
+            }
+
+            // Process options
+            const processedQuestions = parsedQuestions.map(q => {
+                if (q.options && typeof q.options === 'object' && !Array.isArray(q.options)) {
+                    const optionsArray = Object.entries(q.options).map(([text, correctness]) => ({
+                        text,
+                        correctness
+                    }));
+                    return { ...q, options: optionsArray };
+                }
+                return q;
+            });
+
+            const stringifiedQuestions = processedQuestions.map(q => JSON.stringify(q, null, 2));
+            setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
+
+        } catch (error) {
+            console.error("Error generating questions:", error);
+            // Add user notification here
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     const handleTopicChange = (e) => {
@@ -182,7 +185,7 @@ const CodeAnalysis = () => {
 
     return (
         <div>
-            <Navbar/>
+            <Navbar />
             <div className="containerCA">
                 <fieldset className="codeAnalysis">
                     <legend className="codeAnalysisLegand">Code Analysis Question</legend>
@@ -526,11 +529,18 @@ const CodeAnalysis = () => {
                                     <b>Options:</b>
                                     {questionObj.options && Array.isArray(questionObj.options) && questionObj.options.map((option, optIdx) => (
                                         <div key={optIdx} className="optionRow">
-                                            <input
-                                                type="text"
-                                                value={option.text}
+                                            <textarea
+                                                value={option.text.replace(/\\n/g, '\n')}
                                                 onChange={(e) => handleOptionTextChange(optIdx, e.target.value)}
                                                 className="editableInput optionKey"
+                                                style={{
+                                                    minHeight: '60px',
+                                                    resize: 'vertical',
+                                                    width: '100%',
+                                                    padding: '8px',
+                                                    border: '1px solid #ccc',
+                                                    borderRadius: '4px'
+                                                }}
                                             />
                                             <select
                                                 value={option.correctness}
