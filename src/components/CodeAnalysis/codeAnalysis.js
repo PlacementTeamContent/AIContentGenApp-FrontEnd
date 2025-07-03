@@ -86,7 +86,7 @@ const CodeAnalysis = () => {
             );
 
             const data = await response.json();
-
+            console.log(data.message);
             let parsedQuestions;
             try {
                 parsedQuestions = JSON.parse(data.message.trim());
@@ -172,7 +172,7 @@ const CodeAnalysis = () => {
 
     return (
         <div>
-            <Navbar/>
+            <Navbar />
             <div className="containerCA">
                 <fieldset className="codeAnalysis">
                     <legend className="codeAnalysisLegand">Code Analysis Question</legend>
@@ -516,11 +516,18 @@ const CodeAnalysis = () => {
                                     <b>Options:</b>
                                     {questionObj.options && Array.isArray(questionObj.options) && questionObj.options.map((option, optIdx) => (
                                         <div key={optIdx} className="optionRow">
-                                            <input
-                                                type="text"
-                                                value={option.text}
+                                            <textarea
+                                                value={option.text.replace(/\\n/g, '\n')}
                                                 onChange={(e) => handleOptionTextChange(optIdx, e.target.value)}
                                                 className="editableInput optionKey"
+                                                style={{
+                                                    minHeight: '60px',
+                                                    resize: 'vertical',
+                                                    width: '100%',
+                                                    padding: '8px',
+                                                    border: '1px solid #ccc',
+                                                    borderRadius: '4px'
+                                                }}
                                             />
                                             <select
                                                 value={option.correctness}
