@@ -65,7 +65,7 @@ const Theoretical = () => {
     };
 
     // Helper function to transform options from object to array
-    /*const transformOptionsToArray = (questionObj) => {
+    const transformOptionsToArray = (questionObj) => {
         if (questionObj && typeof questionObj.options === 'object' && !Array.isArray(questionObj.options)) {
             const optionsArray = Object.entries(questionObj.options).map(([text, correct]) => ({
                 text: text,
@@ -74,39 +74,37 @@ const Theoretical = () => {
             return { ...questionObj, options: optionsArray };
         }
         return questionObj;
-    };*/
+    };
 
     // Request questions from API
     const requestQuestions = async () => {
-    if (!allFieldsFilled()) return;
+        if (!allFieldsFilled()) return;
 
-    setLoading(true);
-    const currentPrompt = updateMessage(rawPrompt);
+        setLoading(true);
+        const currentPrompt = updateMessage(rawPrompt);
 
-    try {
-        const response = await authFetch(
-            "https://ravik00111110.pythonanywhere.com/api/content-gen/generate/",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    prompt: currentPrompt,
-                    difficulty,
-                    question_type: "MCQ",
-                    topic: topicTag.toUpperCase(),
-                    subtopic: subTopicTag.toUpperCase(),
-                    number_of_question: numberOfQuestions
-                }),
-            },
-            navigate,
-            200000,
-            true
-        );
+        try {
+            const response = await authFetch(
+                "https://ravik00111110.pythonanywhere.com/api/content-gen/generate/",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        prompt: currentPrompt,
+                        difficulty,
+                        question_type: "MCQ",
+                        topic: topicTag.toUpperCase(),
+                        subtopic: subTopicTag.toUpperCase(),
+                        number_of_question: numberOfQuestions
+                    }),
+                },
+                navigate,
+                200000,
+                true
+            );
 
-        const data = await response.json();
-
-        // Remove the ```json and the closing ```, if present
-        let message = data.message.trim();
+            const data = await response.json();
+            let message = data.message.trim();
         if (message.startsWith("```json")) {
             message = message.substring(7); // Remove "```json" from the start
         }
@@ -121,31 +119,18 @@ const Theoretical = () => {
             parsedQuestions = [];
         }
 
-        if (!Array.isArray(parsedQuestions)) {
-            parsedQuestions = [];
+            // Transform options to array before stringifying
+            const stringifiedQuestions = parsedQuestions.map(q =>
+                JSON.stringify(transformOptionsToArray(q), null, 2)
+            );
+
+            setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
+        } catch {
+            // handle fetch error silently or add notification as needed
+        } finally {
+            setLoading(false);
         }
-
-        // Convert options object to array format to preserve order
-        const processedQuestions = parsedQuestions.map(q => {
-            if (q.options && typeof q.options === 'object') {
-                const optionsArray = Object.entries(q.options).map(([text, correctness]) => ({
-                    text,
-                    correctness
-                }));
-                return { ...q, options: optionsArray };
-            }
-            return q;
-        });
-
-        const stringifiedQuestions = processedQuestions.map(q => JSON.stringify(q, null, 2));
-        setQuestionsJson(prev => [...prev, ...stringifiedQuestions]);
-    } catch {
-        // handle fetch error silently or add notification as needed
-    } finally {
-        setLoading(false);
-    }
-};
-
+    };
 
     // Handle topic change
     const handleTopicChange = (e) => {
@@ -514,10 +499,8 @@ const Theoretical = () => {
                             <option value="default">Choose Topic Tag</option>
                             <option value="TOPIC_HTML_CSS_MCQ">TOPIC_HTML_CSS_MCQ</option>
                             <option value="TOPIC_PYTHON_MCQ">TOPIC_PYTHON_MCQ</option>
-                            <option value="TOPIC_JS_MCQ">TOPIC_JS_MCQ</option>
                             <option value="TOPIC_CPP_MCQ">TOPIC_CPP_MCQ</option>
-
-
+                            <option value="TOPIC_JS_MCQ">TOPIC_JS_MCQ</option>
                         </select>
 
                         <input
@@ -584,6 +567,7 @@ const Theoretical = () => {
                             flexWrap: "wrap"
                         }}>
                             <h2 style={{ margin: 0 }}>Edit Generated Questions</h2>
+
                             <div style={{
                                 backgroundColor: "#f1f3f5",
                                 borderRadius: "8px",

@@ -94,14 +94,20 @@ const TheoreticalCodeSnippet = () => {
             );
 
             const data = await response.json();
-            console.log(data)
-            let parsedQuestions;
+            let message = data.message.trim();
+        if (message.startsWith("```json")) {
+            message = message.substring(7);
+        }
+        if (message.endsWith("```")) {
+            message = message.slice(0, -3);
+        }
 
-            try {
-                parsedQuestions = JSON.parse(data.message.trim());
-            } catch {
-                parsedQuestions = [];
-            }
+        let parsedQuestions;
+        try {
+            parsedQuestions = JSON.parse(message);
+        } catch {
+            parsedQuestions = [];
+        }
 
             if (!Array.isArray(parsedQuestions)) {
                 parsedQuestions = [];

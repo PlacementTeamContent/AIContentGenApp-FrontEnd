@@ -59,7 +59,7 @@ h1 {
     animation: pulse 1.5s infinite;
 }
 
-input {
+.login input {
     height: 30px;
     padding: 5px;
     border: 2px solid #ccc;
