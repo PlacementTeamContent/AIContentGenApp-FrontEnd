@@ -538,11 +538,12 @@ const TheoreticalCodeSnippet = () => {
                             
                         />
                         </div>
-                        <h3>Optional tags</h3>
+                         <div className="details-text">
+                        <h3>----- Details for Optional tags -----</h3>
+                    </div>
                         <div className="topin-input">
                             <input
                                 type="text"
-                                className="caBoxes tag"
                                 placeholder="Enter unit Tag"
                                 value={unitTag}
                                 onChange={(e) => {
@@ -554,7 +555,7 @@ const TheoreticalCodeSnippet = () => {
                             />
                             <input
                                 type="text"
-                                className="caBoxes tag"
+                                className="caBoxes"
                                 placeholder="Enter Module Tag"
                                 value={moduleTag}
                                 onChange={(e) => {
@@ -566,7 +567,7 @@ const TheoreticalCodeSnippet = () => {
                             />
                             <input
                                 type="text"
-                                className="caBoxes tag"
+                                className="caBoxes "
                                 placeholder="Enter Course Tag"
                                 value={courseTag}
                                 onChange={(e) => {
