@@ -25,12 +25,11 @@ const CodeAnalysis = () => {
     const [isPromptEdited, setEditPromptStatus] = useState(false);
     const [processName, setProcessName]= useState("");
 
-
     const techToProcessName = {
         CPP: "ca_mcq_cpp",
         Python: "ca_mcq_python",
-        Java: "ca_mcq_java",
-        C: "ca_mcq_c",
+        Java: "",
+        C: "",
         Javascript: "ca_mcq_javascript",
         Sql: "ca_mcq_sql",
         HTML_CSS: "ca_mcq_html_css"
@@ -81,7 +80,7 @@ const CodeAnalysis = () => {
                         topic: topicTag.toUpperCase(),
                         subtopic: subTopicTag.toUpperCase(),
                         number_of_question: numberOfQuestions,
-                        isUpdated: isPromptEdited,
+                        is_updated: isPromptEdited,
                         process_name: processName
                     }),
                 },
@@ -141,20 +140,19 @@ const CodeAnalysis = () => {
         setTopicTag(e.target.value);
     };
 
-    const handleTechnologyChange = async (e) => {
-        const value = e.target.value;
+    const handleTechnologyChange = async (value) => {
         setTechnology(value);
-
         const mappedProcessName = techToProcessName[value];
-        setProcessName(mappedProcessName)
+        setProcessName(mappedProcessName);
+
         if (!mappedProcessName) return;
 
         const response = await authFetch(
             "https://ravik00111110.pythonanywhere.com/api/content-gen/prompt/",
             {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ process_name: mappedProcessName }),
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ process_name: mappedProcessName }),
             },
             navigate,
             200000,
@@ -164,9 +162,10 @@ const CodeAnalysis = () => {
         if (response && response.status === 200) {
             const data = await response.json();
             setRawPrompt(data.prompt);
-            updateMessage(data.prompt);
+            updateMessage(data.prompt, { technology: value });
         }
-    };
+        };
+
 
     const updateMessage = (template, overrides = {}) => {
         const replacements = {
@@ -201,7 +200,15 @@ const CodeAnalysis = () => {
                     </div>
 
                     <div className="itemsCA">
-                        <select className="itemCA1" value={technology} onChange={handleTechnologyChange}>
+                        <select
+                        className="itemCA1"
+                        value={technology}
+                        onChange={(e) => {
+                            const newTech = e.target.value;
+                            handleTechnologyChange(newTech);
+                        }}
+
+                        >
                             <option value="default">Technology</option>
                             <option value="CPP">CPP</option>
                             <option value="Python">Python</option>
@@ -211,6 +218,7 @@ const CodeAnalysis = () => {
                             <option value="Sql">Sql</option>
                             <option value="HTML_CSS">HTML_CSS</option>
                         </select>
+
 
                         <input
                             type="text"
