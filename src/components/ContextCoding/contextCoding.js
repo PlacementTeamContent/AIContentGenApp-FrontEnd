@@ -15,12 +15,13 @@ const ContextEditor = () => {
   const [loading, setLoading] = useState(false);
   const [csvResponse, setcsvResponse] = useState("");
 
-  console.log(contexts);
-
   const handleAddContext = () => {
-    if (!context || !difficulty || !subtopic) return alert('Fill all fields');
+    if (!context || !difficulty || !subtopic) {
+      return alert('Fill all fields');
+    }
 
     if (editId) {
+      // Editing existing context
       setContexts((prev) =>
         prev.map((item) =>
           item.id === editId
@@ -30,6 +31,7 @@ const ContextEditor = () => {
       );
       setEditId(null);
     } else {
+      // Adding new context
       const newEntry = {
         id: uuidv4(),
         context,
@@ -39,6 +41,7 @@ const ContextEditor = () => {
       setContexts([...contexts, newEntry]);
     }
 
+    // Clear fields after adding or editing
     setContext('');
     setDifficulty('');
     setsubtopic('');
@@ -58,7 +61,6 @@ const ContextEditor = () => {
 
   const sendContexts = async () => {
     const contextsToSend = contexts.map(({ id, ...rest }) => rest);
-    console.log("Sending contexts:", contextsToSend);
 
     const apiUrl = 'https://ravik00111110.pythonanywhere.com/api/content-gen/curate/';
 
@@ -73,14 +75,14 @@ const ContextEditor = () => {
         }),
       });
 
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to send data. Server responded with: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log(data)
-      setcsvResponse(data.csv_content); 
+      setcsvResponse(data.csv_content);
 
     } catch (error) {
       console.error('Error sending data:', error.message);
@@ -121,14 +123,17 @@ const ContextEditor = () => {
             value={context}
             onChange={(e) => setContext(e.target.value)}
           />
-          <input
-            placeholder="Select difficulty"
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
-          />
+
+          <select onChange={(e) => setDifficulty(e.target.value)} value={difficulty}>
+            <option value="">Select Difficulty</option>
+            <option value="EASY">EASY</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="HARD">HARD</option>
+          </select>
+
           <input
             placeholder="Select Sub Topic"
-            value={subtopic}
+            value={subtopic.toUpperCase()}
             onChange={(e) => setsubtopic(e.target.value)}
           />
           <button onClick={handleAddContext}>

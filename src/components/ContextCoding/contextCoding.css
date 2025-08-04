@@ -39,6 +39,13 @@
   border-radius: 8px;
 }
 
+.input-section select {
+  padding: 10px;
+  font-size: 14px;
+  border: 2px solid #aaa;
+  border-radius: 8px;
+}
+
 .input-section button {
   padding: 12px;
   font-size: 14px;
