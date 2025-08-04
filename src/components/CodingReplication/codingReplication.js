@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Navbar from "../Navbar/navbar";
-import "./coding.css";
+import "./codingReplication.css";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { useNavigate } from "react-router-dom";
@@ -22,7 +22,7 @@ const encodeBase64 = (str) => {
     }
 };
 
-const Coding = () => {
+const CodingReplication = () => {
     const navigate = useNavigate();
     const [jsonData, setJsonData] = useState(null);
     const [jsonText, setJsonText] = useState("");
@@ -660,4 +660,4 @@ const Coding = () => {
     );
 };
 
-export default Coding;
+export default CodingReplication;

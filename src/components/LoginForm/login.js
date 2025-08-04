@@ -87,67 +87,65 @@ const LoginForm = () => {
     
 
     return (
-        <form onSubmit={handleLogin}>
-            <div className="container">
-                <div className="login">
-                        <h1 className="login-heading">Login</h1>
+        <form onSubmit={handleLogin} className="login-container">
+            <div className="login">
+                <h1 className="login-heading">Login</h1>
 
-                        {/* Loading Animation Overlay */}
-                        {isLoading && (
-                            <div className="loading-overlay">
-                                <div className="loading-content">
-                                    <div className="emoji-spinner">
-                                        <span className="loading-emoji">{currentEmoji}</span>
-                                    </div>
-                                    <p className="loading-message">
-                                        {loadingMessages[Math.floor(Math.random() * loadingMessages.length)]}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-                        
-                        <label>User Name</label>
-                        <input
-                            type="text"
-                            placeholder="Username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                            disabled={isLoading}
-                        />
-                        <label>Password</label>
-                        <input
-                            type={showPassword ? 'text' : 'password'}
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            disabled={isLoading}
-                        />
-                        <div className="show-password">
-                            <span onClick={togglePasswordVisibility} style={{ cursor: 'pointer' }}>
-                            {showPassword ? <p><span className="pass"><FiEyeOff /></span>Hide Password</p> : <p><span className="pass"><FiEye /></span>Show Password</p>}
-                        </span>
-                        </div>
-                        <br />
-                        <button
-                            className={`login-button ${isLoading ? 'loading' : ''}`}
-                            type="submit"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <span className="button-emoji">{currentEmoji}</span>
-                                    Logging in...
-                                </>
-                            ) : (
-                                'Login'
-                            )}
-                        </button>
-
+                {/* Loading Animation Overlay */}
+                {isLoading && (
+                <div className="loading-overlay">
+                    <div className="loading-content">
+                    <div className="emoji-spinner">
+                        <span className="loading-emoji">{currentEmoji}</span>
+                    </div>
+                    <p className="loading-message">
+                        {loadingMessages[Math.floor(Math.random() * loadingMessages.length)]}
+                    </p>
+                    </div>
                 </div>
+                )}
+
+                <label>User Name</label>
+                <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                disabled={isLoading}
+                />
+                <label>Password</label>
+                <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                />
+                <div className="show-password">
+                <span onClick={togglePasswordVisibility} style={{ cursor: 'pointer' }}>
+                    {showPassword ? <p><span className="pass"><FiEyeOff /></span>Hide Password</p> : <p><span className="pass"><FiEye /></span>Show Password</p>}
+                </span>
+                </div>
+                <br />
+                <button
+                className={`login-button ${isLoading ? 'loading' : ''}`}
+                type="submit"
+                disabled={isLoading}
+                >
+                {isLoading ? (
+                    <>
+                    <span className="button-emoji">{currentEmoji}</span>
+                    Logging in...
+                    </>
+                ) : (
+                    'Login'
+                )}
+                </button>
             </div>
         </form>
+
     );
 };
 

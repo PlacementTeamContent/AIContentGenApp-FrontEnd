@@ -4,35 +4,26 @@
   margin: 20px auto;
   padding: 0 16px;
   display: flex;
+  align-items: flex-start;
+  justify-content: center; /* Center the items horizontally */
   gap: 20px;
   flex-wrap: wrap;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #111827;
 }
 
-
-.input-container{
+/* Input/Output Containers */
+.input-container,
+.output-container {
   background: #ffffff;
   border-radius: 8px;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.1);
   padding: 20px;
-  width: 70%;
+  width: 70%; /* Adjust the width as per your requirement */
   max-height: 700px;
   overflow-y: auto;
+  margin: 0 auto; /* This ensures the containers are centered */
 }
-
-
-.output-container {
-  background: #FFFFFF;
-  border-radius: 8px;
-  box-shadow: 0 3px 10px rgb(0 0 0 / 0.1);
-  padding: 20px;
-  width: 70%;
-  max-height: 600px;
-  overflow-y: auto;
-  position: relative;
-}
-
 
 /* Sections inside containers */
 .json-upload-section,
@@ -69,10 +60,7 @@
   border: 1px solid #d1d5db;
   border-radius: 6px;
   cursor: pointer;
-  
 }
-
-
 
 /* JSON Textarea */
 .textarea-container {
@@ -91,7 +79,7 @@
   resize: none;
 }
 
-.download-btn{
+.download-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -117,7 +105,6 @@
   display: inline-block;
   background-color: #4f46e5;
   color: white;
-  
 }
 
 .generate-button:hover,
@@ -161,16 +148,14 @@
 }
 
 /* Error message */
-.error-message {
+.error-message,
+.api-error-message {
   color: #dc2626;
   font-weight: 600;
   margin-top: 25px;
 }
 
-.api-error-message{
-  color: #dc2626;
-  font-weight: 600;
-  margin-top: 25px;
+.api-error-message {
   margin-bottom: 25px;
   text-align: center;
 }
@@ -213,7 +198,8 @@
 }
 
 /* Text inputs */
-.text-input {
+.text-input,
+.textarea-input {
   width: 100%;
   padding: 8px 10px;
   font-size: 14px;
@@ -227,16 +213,7 @@
 
 /* Textareas */
 .textarea-input {
-  width: 100%;
-  padding: 10px;
-  font-family: monospace;
-  font-size: 14px;
-  margin-top: 4px;
-  margin-bottom: 18px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
   resize: vertical;
-  box-sizing: border-box;
 }
 
 /* Input/Output Testcases container */
@@ -308,12 +285,22 @@
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
+    align-items: center;
   }
 
   .input-container,
   .output-container {
+    width: 90%; /* On small screens, give the containers more space */
     max-height: none;
-    min-width: 100%;
+  }
+
+  .generate-button,
+  .download-btn,
+  .nav-btn,
+  .question-key-btn {
+    min-width: 60px; 
+    padding: 12px;
+    font-size: 16px;
   }
 }
 
@@ -335,7 +322,8 @@
   margin-bottom: 6px;
 }
 
-.input-field, .textarea-field {
+.input-field,
+.textarea-field {
   width: 100%;
   padding: 10px;
   font-family: monospace;
@@ -348,10 +336,10 @@
   box-sizing: border-box;
 }
 
-.btn-container{
+/* Button Container */
+.btn-container {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 25px;
 }
-
