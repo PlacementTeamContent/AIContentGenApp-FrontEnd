@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useAuthGuard } from "../../utils/useAuthGuard";
-import Navbar from "../Navbar/navbar"; // Adjust the path based on your structure
+import Navbar from "../Navbar/navbar";
 
 import './home.css';
 
@@ -43,7 +43,7 @@ const HomePage = () => {
                         <fieldset>
                             <legend>Coding Curation</legend>
                             <div className="Items">
-                                <button className="item1">Coding</button>
+                                <button className="item" onClick={()=> navigate("../ContextCoding")}>Coding</button>
                                 <button className="item1">Web Coding</button>
                                 <button className="item1">SQL Coding</button>
                             </div>
@@ -53,7 +53,7 @@ const HomePage = () => {
                         <fieldset>
                             <legend>Coding Replication</legend>
                             <div className="Items">
-                                <button className="item" onClick={() => navigate('../Coding')}>Coding</button>
+                                <button className="item" onClick={() => navigate('../CodingReplication')}>Coding</button>
                                 <button className="item1">Web Coding</button>
                                 <button className="item1">SQL Coding</button>
                             </div>
