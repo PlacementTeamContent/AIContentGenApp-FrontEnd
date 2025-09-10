@@ -7,6 +7,8 @@ import CodingReplication from "./components/CodingReplication/codingReplication"
 import Theoretical from "./components/Theoretical/theoretical";
 import TheoreticalCodeSnippet from "./components/TheoreticalCodeSnippet/TheoreticalCodeSnippet";
 import ContextCoding from "./components/ContextCoding/contextCoding";
+
+import ContentLoop from "./components/ContentLoop/ContentLoop";
 import './App.css'; // Import your main CSS file
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');

@@ -8,9 +8,10 @@ padding: 0;
   justify-content: space-between;
   width: auto;
   align-items: center;
-  background-color: #1565D8;
+  background-color: #ffffff;
   padding: 10px 20px;
   color: black;
+  height: 60px;
 }
 
 .navbar-logo{
@@ -20,19 +21,18 @@ padding: 0;
 .navbar-logo h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: white;
+  color: #000000;
+  font-family: 'Kaushan Script';
 }
 
 .navbar-actions button {
-  background-color: white;
-  color: black;
-  border: none;
+  background-color: transparent;
+  border: 2px solid #1E56C3;
+  color: #1E56C3;
   padding: 8px 16px;
   font-size: 1rem;
   cursor: pointer;
-  
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
-   border-radius: 5px;
+  border-radius: 5px;
   transition: 0.3s;
 }
 

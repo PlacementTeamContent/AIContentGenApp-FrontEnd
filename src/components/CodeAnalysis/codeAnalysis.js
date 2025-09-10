@@ -28,8 +28,8 @@ const CodeAnalysis = () => {
     const techToProcessName = {
         CPP: "ca_mcq_cpp",
         Python: "ca_mcq_python",
-        Java: "",
-        C: "",
+        Java: "ca_mcq_java",
+        C: "ca_mcq_c",
         Javascript: "ca_mcq_javascript",
         Sql: "ca_mcq_sql",
         HTML_CSS: "ca_mcq_html_css"

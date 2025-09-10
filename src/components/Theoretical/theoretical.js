@@ -149,7 +149,11 @@ const Theoretical = () => {
 
     // Handle topic change
     const handleTopicChange = (e) => {
-        setTopicTag(e.target.value);
+        const newValue = e.target.value;
+        setTopicTag(newValue);
+        if (rawPrompt) {
+            updateMessage(rawPrompt);
+        }
     };
 
     // Handle technology change and fetch prompt
@@ -164,30 +168,45 @@ const Theoretical = () => {
 
         if (!mappedProcessName) {
             console.error("No mapping found for technology:", value);
+            setRawPrompt("");
+            setMessage("");
             return;
         }
 
-        const response = await authFetch(
-            "https://ravik00111110.pythonanywhere.com/api/content-gen/prompt/",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ process_name: mappedProcessName }),
-            },
-            navigate,
-            200000,
-            true
-        );
+        try {
+            const response = await authFetch(
+                "https://ravik00111110.pythonanywhere.com/api/content-gen/prompt/",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ process_name: mappedProcessName }),
+                },
+                navigate,
+                200000,
+                true
+            );
 
-        if (response && response.status === 200) {
-            const data = await response.json();
-            setRawPrompt(data.prompt);
-            updateMessage(data.prompt);
+            if (response && response.status === 200) {
+                const data = await response.json();
+                setRawPrompt(data.prompt);
+                // Use the current state values with the new prompt
+                const updatedMessage = updateMessage(data.prompt, { technology: value });
+                setMessage(updatedMessage);
+            }
+        } catch (error) {
+            console.error("Error fetching prompt:", error);
+            setRawPrompt("");
+            setMessage("");
         }
     };
 
     // Update message template with current values
     const updateMessage = (template, overrides = {}) => {
+        if (!template) {
+            setMessage("");
+            return "";
+        }
+
         const replacements = {
             "{{technology}}": overrides.technology ?? technology,
             "{{topic}}": overrides.topic ?? topic,
@@ -195,9 +214,9 @@ const Theoretical = () => {
             "{{difficulty_level}}": overrides.difficulty ?? difficulty,
             "{{topic_tag}}": overrides.topic_tag ?? topicTag,
             "{{sub_topic_tag}}": overrides.subTopicTag ?? subTopicTag,
-            "{{unit_tag}}":overrides.unitTag ?? unitTag,
-            "{{module_tag}}":overrides.moduleTag ?? moduleTag,
-            "{{course_tag}}":overrides.moduleTag ?? courseTag,
+            "{{unit_tag}}": overrides.unitTag ?? unitTag,
+            "{{module_tag}}": overrides.moduleTag ?? moduleTag,
+            "{{course_tag}}": overrides.courseTag ?? courseTag,
             "{{syllabus_details}}": overrides.syllabus ?? syllabus,
         };
 
@@ -465,7 +484,9 @@ const Theoretical = () => {
                             onChange={(e) => {
                                 const newValue = e.target.value;
                                 setTopic(newValue);
-                                updateMessage(rawPrompt, { topic: newValue });
+                                if (rawPrompt) {
+                                    updateMessage(rawPrompt, { topic: newValue });
+                                }
                             }}
                         />
 
@@ -477,7 +498,9 @@ const Theoretical = () => {
                             onChange={(e) => {
                                 const newValue = e.target.value.replace(/[^0-9]/g, '');
                                 setNumberOfQuestions(newValue);
-                                updateMessage(rawPrompt, { number_of_questions: newValue });
+                                if (rawPrompt) {
+                                    updateMessage(rawPrompt, { number_of_questions: newValue });
+                                }
                             }}
                             onKeyDown={(e) => {
                                 if (
@@ -499,7 +522,9 @@ const Theoretical = () => {
                             onChange={(e) => {
                                 const newValue = e.target.value;
                                 setDifficulty(newValue);
-                                updateMessage(rawPrompt, { difficulty: newValue });
+                                if (rawPrompt) {
+                                    updateMessage(rawPrompt, { difficulty: newValue });
+                                }
                             }}
                         >
                             <option value="default">Choose Difficulty</option>
@@ -539,7 +564,9 @@ const Theoretical = () => {
                             onChange={(e) => {
                                 const newValue = e.target.value;
                                 setSubTopicTag(newValue);
-                                updateMessage(rawPrompt);
+                                if (rawPrompt) {
+                                    updateMessage(rawPrompt);
+                                }
                             }}
                             
                         />
@@ -556,7 +583,9 @@ const Theoretical = () => {
                                 onChange={(e) => {
                                     const newValue = e.target.value;
                                     setUnitTag(newValue);
-                                    updateMessage(rawPrompt);
+                                    if (rawPrompt) {
+                                        updateMessage(rawPrompt);
+                                    }
                                 }}
                                 
                             />
@@ -568,7 +597,9 @@ const Theoretical = () => {
                                 onChange={(e) => {
                                     const newValue = e.target.value;
                                     setModuleTag(newValue);
-                                    updateMessage(rawPrompt);
+                                    if (rawPrompt) {
+                                        updateMessage(rawPrompt);
+                                    }
                                 }}
                                 
                             />
@@ -580,7 +611,9 @@ const Theoretical = () => {
                                 onChange={(e) => {
                                     const newValue = e.target.value;
                                     setCourseTag(newValue);
-                                    updateMessage(rawPrompt);
+                                    if (rawPrompt) {
+                                        updateMessage(rawPrompt);
+                                    }
                                 }}
                                 
                             />
@@ -595,7 +628,9 @@ const Theoretical = () => {
                         onChange={(e) => {
                             const newValue = e.target.value;
                             setSyllabus(newValue);
-                            updateMessage(rawPrompt, { syllabus: newValue });
+                            if (rawPrompt) {
+                                updateMessage(rawPrompt, { syllabus: newValue });
+                            }
                         }}
                     />
 
