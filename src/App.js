@@ -25,6 +25,7 @@ function App() {
                 <Route path="/Theoretical" element={<Theoretical />} />
                 <Route path="/TheoreticalCodeSnippetMCQS" element={<TheoreticalCodeSnippet/>} />
                 <Route path="/ContextCoding" element ={<ContextCoding/>}/>
+                <Route path="/ContentLoop" element={<ContentLoop />} />
             </Routes>
         </BrowserRouter>
     );

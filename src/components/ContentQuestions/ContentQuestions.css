@@ -109,7 +109,7 @@
   height: 45px;
   min-height: 45px;
   max-height: 45px;
-  padding: 0 1.5rem;
+  padding: 0 1rem;
   border: 1px solid #d0d7de;
   border-radius: 6px;
   background-color: white;
@@ -118,7 +118,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 230px;
+  min-width: 200px;
   box-shadow: none !important;
   border: 2px solid #001A48;
 }
@@ -147,6 +147,9 @@
   max-height: 45px;
   display: flex;
   align-items: center;
+  width: 100%;
+  max-width: 280px;
+  justify-content: center;
 }
 
 .header-counter-text {
