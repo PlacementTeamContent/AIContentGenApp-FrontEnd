@@ -581,8 +581,16 @@ const Theoretical = () => {
                                 placeholder="Enter unit Tag"
                                 value={unitTag}
                                 onChange={(e) => {
-                                    const newValue = e.target.value;
-                                    setUnitTag(newValue);
+                                    const inputValue = e.target.value;
+                                    // Extract the part after UNIT_ if it exists, otherwise use the full input
+                                    const userInput = inputValue.startsWith('UNIT_') 
+                                        ? inputValue.substring(5) 
+                                        : inputValue;
+                                    // Convert input to proper format: UNIT_formatted_text
+                                    const formattedValue = userInput
+                                        ? `UNIT_${userInput.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}`
+                                        : "UNIT_";
+                                    setUnitTag(formattedValue);
                                     if (rawPrompt) {
                                         updateMessage(rawPrompt);
                                     }
@@ -595,8 +603,16 @@ const Theoretical = () => {
                                 placeholder="Enter Module Tag"
                                 value={moduleTag}
                                 onChange={(e) => {
-                                    const newValue = e.target.value;
-                                    setModuleTag(newValue);
+                                    const inputValue = e.target.value;
+                                    // Extract the part after MODULE_ if it exists, otherwise use the full input
+                                    const userInput = inputValue.startsWith('MODULE_') 
+                                        ? inputValue.substring(7) 
+                                        : inputValue;
+                                    // Convert input to proper format: MODULE_formatted_text
+                                    const formattedValue = userInput
+                                        ? `MODULE_${userInput.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}`
+                                        : "MODULE_";
+                                    setModuleTag(formattedValue);
                                     if (rawPrompt) {
                                         updateMessage(rawPrompt);
                                     }
@@ -609,8 +625,16 @@ const Theoretical = () => {
                                 placeholder="Enter Course Tag"
                                 value={courseTag}
                                 onChange={(e) => {
-                                    const newValue = e.target.value;
-                                    setCourseTag(newValue);
+                                    const inputValue = e.target.value;
+                                    // Extract the part after COURSE_ if it exists, otherwise use the full input
+                                    const userInput = inputValue.startsWith('COURSE_') 
+                                        ? inputValue.substring(7) 
+                                        : inputValue;
+                                    // Convert input to proper format: COURSE_formatted_text
+                                    const formattedValue = userInput
+                                        ? `COURSE_${userInput.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}`
+                                        : "COURSE_";
+                                    setCourseTag(formattedValue);
                                     if (rawPrompt) {
                                         updateMessage(rawPrompt);
                                     }

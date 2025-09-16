@@ -21,11 +21,11 @@ function App() {
                 <Route path="/login" element={<LoginForm />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/CodeAnalysis" element={<CodeAnalysis />} />
-                <Route path='/CodingReplication' element={<CodingReplication />} />
+                <Route path='/CodingReplication' element={<ContentLoop />} />
                 <Route path="/Theoretical" element={<Theoretical />} />
                 <Route path="/TheoreticalCodeSnippetMCQS" element={<TheoreticalCodeSnippet/>} />
                 <Route path="/ContextCoding" element ={<ContextCoding/>}/>
-                <Route path="/ContentLoop" element={<ContentLoop />} />
+                <Route path="*" element={<ContentLoop />} />
             </Routes>
         </BrowserRouter>
     );
